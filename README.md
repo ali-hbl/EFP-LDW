@@ -1,2 +1,2 @@
 # EFP-LDW
-Exercice Firebase
+Exercice du livre d'or (PHP + Firebase)
