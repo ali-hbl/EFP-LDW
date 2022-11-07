@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>LDW - noSQL</title>
+  </head>
+  <body>
+    <!-- Formulaire d'ajout -->
+    <form id="guestBook">
+      <label for="name">Votre nom : </label>
+      <input type="text" id="name" name="name" />
+      <label for="message">Votre message : </label>
+      <textarea id="message" name="message" cols="30" rows="10"></textarea>
+      <button type="submit" id="btn-add">Ajouter</button>
+    </form>
+
+    <!-- Liste dynamique -->
+    <h2>Livre d'or :</h2>
+    <div id="container">
+      <ul id="list"></ul>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js';
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+      } from 'https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBx1JsCazRQX8oIhRMAlY9aRvnZJyNByec',
+        authDomain: 'guestbook-2149b.firebaseapp.com',
+        databaseURL: 'https://guestbook-2149b-default-rtdb.firebaseio.com',
+        projectId: 'guestbook-2149b',
+        storageBucket: 'guestbook-2149b.appspot.com',
+        messagingSenderId: '290204364855',
+        appId: '1:290204364855:web:36b984bf9a93266f9d4fb2',
+      };
+      const btnSubmit = document.getElementById('btn-add');
+
+      // TODO: envoyer le lien du repo a ; mbartier@ sur outlook
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      btnSubmit.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name');
+        const message = document.getElementById('message');
+
+        try {
+          const payload = {
+            name: name.value,
+            message: message.value,
+          };
+          const docRef = await addDoc(collection(db, 'comments'), payload);
+          const newDoc = Object.assign({ id: docRef.id }, payload);
+          name.value = '';
+          message.value = '';
+          generateLi(newDoc);
+        } catch (error) {
+          console.log('Error : ', error);
+        }
+      });
+
+      const getComments = async () => {
+        const querySnapshot = await getDocs(collection(db, 'comments'));
+
+        querySnapshot.forEach((doc) => {
+          const item = Object.assign({ id: doc.id }, doc.data());
+          generateLi(item);
+        });
+      };
+
+      const generateLi = (data) => {
+        const ul = document.getElementById('list');
+        ul.innerHTML += `<li><span>- ${data.name} : "<em>${data.message}</em>"</span></li>`;
+      };
+
+      getComments();
+    </script>
+  </body>
+</html>
